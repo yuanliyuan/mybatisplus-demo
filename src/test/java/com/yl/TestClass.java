@@ -1,17 +1,31 @@
 package com.yl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.yl.mapper.UserMapper;
+import com.yl.model.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
+import java.util.List;
+
+// https://blog.csdn.net/hxyascx/article/details/95590031
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestClass {
 
+    @Autowired
+    private UserMapper userMapper;
+
     //1.根据主键查找
     @Test
     public void selectById() {
+
+        User user = userMapper.selectById(1);
+        System.out.println(user);
 
     }
 
@@ -19,6 +33,8 @@ public class TestClass {
     @Test
     public void selectBatchIds() {
 
+        List<User> users = userMapper.selectBatchIds(Arrays.asList(1, 2));
+        users.forEach(System.out::println);
     }
 
     /******************************************QueryWrapper******************/
@@ -29,6 +45,11 @@ public class TestClass {
      */
     @Test
     public void selectByWrapper() {
+        QueryWrapper<User> query = new QueryWrapper<>();
+        query.like("name", "oss")
+                .lt("age", 40);
+        List<User> users = userMapper.selectList(query);
+        users.forEach(System.out::println);
 
     }
 
@@ -38,7 +59,13 @@ public class TestClass {
      */
     @Test
     public void selectByWrapper2() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("name", "oss")
+                .between("age", 20, 40)
+                .isNotNull("email");
 
+        List<User> users = userMapper.selectList(queryWrapper);
+        users.forEach(System.out::println);
     }
 
     /**
@@ -47,6 +74,13 @@ public class TestClass {
      */
     @Test
     public void selectByWrapper3() {
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.apply("date_format(create_time,'%Y-%m-%d') = {0}", "2019-07-11")
+                .inSql("manager_id", "select id from mpdemo where name like '%Boss'");
+
+        List<User> users = userMapper.selectList(queryWrapper);
+        users.forEach(System.out::println);
 
     }
 
@@ -57,6 +91,12 @@ public class TestClass {
     @Test
     public void selectByWrapper4() {
 
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.likeLeft("name", "Boss")
+                .and(wq -> wq.lt("age", 40).or().isNotNull("email"));
+
+        List<User> users = userMapper.selectList(queryWrapper);
+        users.forEach(System.out::println);
     }
 
     /**
@@ -65,6 +105,11 @@ public class TestClass {
      */
     @Test
     public void selectByWrapper5() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.likeLeft("name", "Boss")
+                .or(wq -> wq.lt("age", "40").gt("age", 40).isNotNull("email"));
+        List<User> users = userMapper.selectList(queryWrapper);
+        users.forEach(System.out::println);
 
     }
 
@@ -74,6 +119,12 @@ public class TestClass {
      */
     @Test
     public void selectByWrapper6() {
+
+       /* QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.or(wq -> wq.lt("age", "40").isNotNull("email"));
+
+        List<User> users = userMapper.selectList(queryWrapper);
+        users.forEach(System.out::println);*/
 
     }
 
